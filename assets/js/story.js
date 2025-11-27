@@ -7,7 +7,7 @@
 let allSteps = [];
 let currentStepIndex = -1;
 let scrollAccumulator = 0;
-const SCROLL_THRESHOLD = window.innerHeight * 0.5; // 50vh
+const SCROLL_THRESHOLD = window.innerHeight * 0.3; // 50vh - change to something smaller
 let currentObject = null;
 
 // Scroll acceleration prevention
@@ -51,6 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
   initializePanels();
   initializeScrollLock();
 });
+
+
+
 
 /**
  * Build index of objects for quick lookup

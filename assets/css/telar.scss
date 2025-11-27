@@ -2220,3 +2220,46 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0.5rem 0.75rem;
   }
 }
+
+
+/* -------------------------
+   Scroll-lock: disable background scrolling when panels open
+   Paste at END of telar.scss (or story-specific CSS)
+   ------------------------- */
+
+/* When a panel is open, freeze the background page */
+body.scroll-locked {
+  /* keep body fixed to avoid viewport jumps */
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* Disable scrolling inside narrative column while locked */
+body.scroll-locked .narrative-column,
+body.scroll-locked .story-steps,
+body.scroll-locked #left-panel-scroll {
+  overflow: hidden !important;
+  -webkit-overflow-scrolling: auto !important;
+  touch-action: none !important;
+}
+
+/* Keep panel internal scrolling enabled (panel scroll wrappers) */
+body.scroll-locked .panel-scroll-inner {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+}
+
+/* Prevent pointer events on interactive things behind panels (optional, safe) */
+body.scroll-locked .viewer-column,
+body.scroll-locked .narrative-column > * {
+  pointer-events: none;
+}
+
+/* Allow pointer events inside panel content */
+body.scroll-locked .offcanvas,
+body.scroll-locked .offcanvas * {
+  pointer-events: auto;
+}

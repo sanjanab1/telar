@@ -14,8 +14,8 @@
   <div class="px-3">
     <h5 class="offcanvas-title" id="panel-layer1-title">Panel Title</h5>
   </div>
-  <div class="offcanvas-body">
-    <div id="panel-layer1-content">
+  <div class="offcanvas-body panel-scroll-wrapper">
+    <div class="panel-scroll-inner" id="panel-layer1-content">
       <!-- Content populated by JavaScript -->
     </div>
   </div>
@@ -32,8 +32,8 @@
   <div class="px-3">
     <h5 class="offcanvas-title" id="panel-layer2-title">Panel Title</h5>
   </div>
-  <div class="offcanvas-body">
-    <div id="panel-layer2-content">
+  <div class="offcanvas-body panel-scroll-wrapper">
+    <div class="panel-scroll-inner" id="panel-layer2-content">
       <!-- Content populated by JavaScript -->
     </div>
   </div>
@@ -50,8 +50,8 @@
   <div class="px-3">
     <h5 class="offcanvas-title" id="panel-glossary-title">Glossary Term</h5>
   </div>
-  <div class="offcanvas-body">
-    <div id="panel-glossary-content">
+  <div class="offcanvas-body panel-scroll-wrapper">
+    <div class="panel-scroll-inner" id="panel-glossary-content">
       <!-- Content populated by JavaScript -->
     </div>
   </div>
@@ -78,6 +78,29 @@
     border-radius: 4px;
     margin: 1rem 0;
   }
+
+  /* Handle panel scrolling */
+  /* Freeze background when any panel is open */
+  body.scroll-locked {
+    position: fixed;
+    width: 100%;
+    overflow: hidden !important;
+    touch-action: none;
+  }
+
+  /* Offcanvas should NOT scroll. */
+  .panel-scroll-wrapper {
+    overflow: hidden !important;
+    padding: 0;
+  }
+
+  .panel-scroll-inner {
+    overflow-y: auto;
+    max-height: calc(100vh - 70px); /* leaves room for header */
+    padding: 1rem 1.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
 
   /* Image size modifiers */
   .offcanvas-body img.img-sm {
@@ -168,4 +191,8 @@
     // Replace image with error message
     img.parentNode.replaceChild(errorDiv, img);
   }
+
+
+
 </script>
+
