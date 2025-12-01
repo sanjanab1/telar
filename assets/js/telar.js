@@ -32,7 +32,10 @@ function initializePanelTriggers() {
       const panel = document.getElementById(panelId);
 
       if (panel) {
-        const bsOffcanvas = new bootstrap.Offcanvas(panel);
+        const bsOffcanvas = new bootstrap.Offcanvas(panel, {
+          scroll: true,
+          backdrop: false
+        });
         bsOffcanvas.show();
       }
     });
@@ -129,7 +132,10 @@ function openGlossaryPanel(termUrl, termTitle) {
     return;
   }
 
-  const bsOffcanvas = bootstrap.Offcanvas.getInstance(panel) || new bootstrap.Offcanvas(panel);
+  const bsOffcanvas = bootstrap.Offcanvas.getInstance(panel) || new bootstrap.Offcanvas(panel, {
+    scroll: true,
+    backdrop: false
+  });
 
   // Check if panel is already open
   if (panel.classList.contains('show')) {

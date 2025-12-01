@@ -784,10 +784,39 @@ function handleKeyboard(e) {
  * Handle scroll accumulation with acceleration prevention
  */
 function handleScroll(e) {
+  // Debug logging - REMOVE
+  console.log('handleScroll called', {
+    target: e.target,
+    clientX: e.clientX,
+    clientY: e.clientY,
+    isPanelOpen: isPanelOpen,
+    scrollLockActive: scrollLockActive
+  });
+  // Check if mouse is over an open panel
+  // Use elementFromPoint to detect what's under the cursor
+  const elementUnderMouse = document.elementFromPoint(e.clientX || 0, e.clientY || 0);
+  console.log('Element under mouse:', elementUnderMouse);
+
+  if (elementUnderMouse && elementUnderMouse.closest('.offcanvas.show')) {
+    console.log('Mouse is over open panel - allowing scroll');
+    // Mouse is over an open panel - don't interfere with panel scrolling
+    return;
+  }
+  // end of debugging
+
+
+  // If a panel is open or scroll-lock is active, do not trigger step
+  // navigation. Do NOT call `preventDefault()` here — we want to
+  // stop the story controller from acting on the event, not to block
+  // the browser's native scrolling. 
+  if (scrollLockActive || isPanelOpen) {
+    return;
+  }
+  
   const now = Date.now();
   const timeSinceLastChange = now - lastStepChangeTime;
 
-  // If we're in cooldown period, decay the accumulator instead of adding to it
+  // If cooldown period, decay the accumulator instead of adding to it
   if (timeSinceLastChange < STEP_COOLDOWN) {
     // Decay accumulator during cooldown to prevent momentum buildup
     scrollAccumulator *= 0.5;
@@ -1254,8 +1283,11 @@ function openPanel(panelType, contentId) {
       panelStack.push({ type: panelType, id: contentId });
     }
 
-    // Open panel
-    const bsOffcanvas = new bootstrap.Offcanvas(panel);
+    // Open panel with scroll enabled (allows panel body to scroll)
+    const bsOffcanvas = new bootstrap.Offcanvas(panel, {
+      scroll: true,
+      backdrop: false
+    });
     bsOffcanvas.show();
 
     // Activate scroll lock
@@ -1393,27 +1425,13 @@ function fixImageUrls(htmlContent, basePath) {
 
 /**
  * Initialize scroll-lock system
- * Auto-closes panels when user continues scrolling
+ * Background scroll locking is now handled by panels.html via the .offcanvas-open class
+ * This function is kept for potential future extensions
  */
 function initializeScrollLock() {
-  const narrativeColumn = document.querySelector('.narrative-column');
-  if (!narrativeColumn) return;
-
-  let scrollTimeout;
-
-  narrativeColumn.addEventListener('scroll', function() {
-    if (!isPanelOpen) return;
-
-    // Clear existing timeout
-    clearTimeout(scrollTimeout);
-
-    // Set timeout to close panels if scrolling continues
-    scrollTimeout = setTimeout(() => {
-      if (isPanelOpen) {
-        closeAllPanels();
-      }
-    }, 300); // Close after 300ms of scrolling
-  });
+  // Scroll locking is now handled purely via CSS in panels.html
+  // The .offcanvas-open class on body restricts only .narrative-column and .viewer-column
+  // This allows panel content to remain scrollable while freezing the background
 }
 
 /**

@@ -472,6 +472,11 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2rem;
   font-size: 1.05rem;
   line-height: 1.8;
+  /* CRITICAL: Enable scrolling in panel */
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 #panel-layer1 .offcanvas-title {
@@ -500,6 +505,11 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2rem;
   font-size: 1.05rem;
   line-height: 1.8;
+  /* CRITICAL: Enable scrolling in panel */
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 #panel-layer2 .offcanvas-title {
@@ -561,6 +571,11 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2rem;
   font-size: 1.05rem;
   line-height: 1.8;
+  /* CRITICAL: Enable scrolling in panel */
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 #panel-glossary .offcanvas-title {

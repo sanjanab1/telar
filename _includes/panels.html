@@ -1,10 +1,11 @@
+
 <!--
   Layered Panel System
   Panels are dynamically populated from chapter data
 -->
 
 <!-- Layer 1 Panel (Primary - Full-width offcanvas) -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="panel-layer1" data-bs-backdrop="false">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="panel-layer1">
   <div class="offcanvas-header">
     <button type="button" class="btn btn-sm btn-outline-secondary" id="panel-layer1-back">
       {{ lang.buttons.back }}
@@ -20,7 +21,7 @@
 </div>
 
 <!-- Layer 2 Panel (Secondary - Stacked on top of Layer 1) -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="panel-layer2" data-bs-backdrop="false">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="panel-layer2">
   <div class="offcanvas-header">
     <button type="button" class="btn btn-sm btn-outline-secondary" id="panel-layer2-back">
       {{ lang.buttons.back }}
@@ -36,7 +37,7 @@
 </div>
 
 <!-- Glossary Panel (Can appear from anywhere) -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="panel-glossary" data-bs-backdrop="false">
+<div class="offcanvas offcanvas-end" tabindex="-1" id="panel-glossary">
   <div class="offcanvas-header">
     <button type="button" class="btn btn-sm btn-outline-secondary" id="panel-glossary-back">
       {{ lang.buttons.back }}
@@ -54,8 +55,17 @@
 
 <style>
   /* Panel stacking - ensure proper z-index */
+  .offcanvas-backdrop {
+    opacity: 0 !important;
+    pointer-events: none;
+  }
+
   .offcanvas {
     z-index: 1050;
+    display: flex !important;
+    flex-direction: column !important;
+    /* Ensure offcanvas height is constrained so body can scroll within it */
+    max-height: 100vh !important;
   }
 
   #panel-layer2 {
@@ -64,6 +74,33 @@
 
   #panel-glossary {
     z-index: 1070;
+  }
+
+  /* Offcanvas header - MUST be part of flex flow, not absolute */
+  .offcanvas-header {
+    position: relative !important; /* Override mobile absolute positioning */
+    flex: 0 0 auto !important; /* Don't grow or shrink */
+    flex-shrink: 0 !important;
+  }
+
+  /* Offcanvas panel body - scrollable content */
+  .offcanvas-body {
+    flex: 1 1 0 !important; /* Grow to fill space, shrink if needed, base size 0 */
+    min-height: 0 !important; /* CRITICAL: allows flex child to shrink below content size */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    position: relative !important; /* Override mobile position: static */
+  }
+
+  /* While any offcanvas is open, prevent ONLY background columns from scrolling */
+  /* Do NOT freeze the body itself - this allows panel content to remain scrollable */
+  body.offcanvas-open .narrative-column,
+  body.offcanvas-open .viewer-column {
+    overflow: hidden !important;
+    -webkit-overflow-scrolling: auto; /* disable momentum on iOS */
+    touch-action: none;               /* prevent touchmove default on supported browsers */
   }
 
   /* Glossary term prefix styling */
@@ -138,8 +175,43 @@
 </style>
 
 <script>
-  // Handle image loading errors in panels
+(function() {
+  // Removed lockBodyScroll/unlockBodyScroll logic
+  // Body scroll locking is now handled purely via CSS using .offcanvas-open class
+  // which only affects the background columns, not the body itself
+
+  function handleImageError(img) {
+    if (img.dataset.errorHandled) return;
+    img.dataset.errorHandled = 'true';
+
+    const src = img.getAttribute('src') || '';
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'img-error';
+    errorDiv.innerHTML = '<strong>Image file not found:</strong> <code>' + src + '</code><br>' +
+                         'Please add this file or update the path in the markdown.';
+    img.parentNode.replaceChild(errorDiv, img);
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
+    const offcanvasElements = document.querySelectorAll('.offcanvas');
+    
+    offcanvasElements.forEach(function(offcanvas) {
+      offcanvas.addEventListener('show.bs.offcanvas', function(e) {
+        document.body.classList.add('offcanvas-open');
+      });
+
+      offcanvas.addEventListener('hidden.bs.offcanvas', function(e) {
+        setTimeout(function() {
+          const anyVisible = Array.from(offcanvasElements).some(el =>
+            el.classList.contains('show')
+          );
+          if (!anyVisible) {
+            document.body.classList.remove('offcanvas-open');
+          }
+        }, 50);
+      });
+    });
+    
     // Add error handlers to existing images
     document.querySelectorAll('.offcanvas-body img').forEach(function(img) {
       img.addEventListener('error', function() {
@@ -171,19 +243,5 @@
       observer.observe(body, { childList: true, subtree: true });
     });
   });
-
-  function handleImageError(img) {
-    // Only process once
-    if (img.dataset.errorHandled) return;
-    img.dataset.errorHandled = 'true';
-
-    const src = img.getAttribute('src') || '';
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'img-error';
-    errorDiv.innerHTML = '<strong>Image file not found:</strong> <code>' + src + '</code><br>' +
-                         'Please add this file or update the path in the markdown.';
-
-    // Replace image with error message
-    img.parentNode.replaceChild(errorDiv, img);
-  }
+})();
 </script>
