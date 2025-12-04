@@ -34,7 +34,7 @@ function initializePanelTriggers() {
       if (panel) {
         const bsOffcanvas = new bootstrap.Offcanvas(panel, {
           scroll: true,
-          backdrop: false
+          backdrop: true
         });
         bsOffcanvas.show();
       }
@@ -134,7 +134,7 @@ function openGlossaryPanel(termUrl, termTitle) {
 
   const bsOffcanvas = bootstrap.Offcanvas.getInstance(panel) || new bootstrap.Offcanvas(panel, {
     scroll: true,
-    backdrop: false
+    backdrop: true
   });
 
   // Check if panel is already open

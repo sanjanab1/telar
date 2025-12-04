@@ -9,19 +9,25 @@
 let allSteps = [];
 let currentStepIndex = -1;
 let scrollAccumulator = 0;
-const SCROLL_THRESHOLD = window.innerHeight * 0.3; // 50vh - change to something smaller
+const SCROLL_THRESHOLD = window.innerHeight * 0.9; // 50vh - change to something smaller
 let currentObject = null;
 
 // Scroll acceleration prevention
 let lastStepChangeTime = 0;
-const STEP_COOLDOWN = 600; // ms - prevent rapid step changes (400ms animation + 200ms buffer)
-const MAX_SCROLL_DELTA = 200; // Cap scroll contribution per event
+const STEP_COOLDOWN = 900; // ms - slightly longer cooldown to make transitions feel less rushed
+const MAX_SCROLL_DELTA = 120; // Cap scroll contribution per event (lower = smoother)
 let currentViewerCard = null; // Currently active viewer card
 let currentStepNumber = null; // Track current step to prevent duplicate processing
 let panelStack = [];
 let objectsIndex = {}; // Quick lookup for object data
 let isPanelOpen = false; // Track if any panel is open
 let scrollLockActive = false; // Track if scroll-lock is active
+// Track last scroll direction to require consistent gestures before advancing
+let lastScrollDirection = 0;
+
+// Viewer animation tuning (centralized)
+const VIEWER_ANIMATION_TIME = 6.0; // seconds for OpenSeadragon animations
+const VIEWER_SPRING_STIFFNESS = 0.6; // lower = smoother, less bouncy
 
 // Touch navigation for iPad/tablets in desktop mode (v0.4.3)
 // Handles swipe gestures to navigate between story steps
@@ -819,20 +825,37 @@ function handleScroll(e) {
   // If cooldown period, decay the accumulator instead of adding to it
   if (timeSinceLastChange < STEP_COOLDOWN) {
     // Decay accumulator during cooldown to prevent momentum buildup
-    scrollAccumulator *= 0.5;
+    scrollAccumulator *= 0.6;
     return;
   }
 
   // Cap scroll delta to prevent huge jumps from trackpad acceleration
   const cappedDelta = Math.max(-MAX_SCROLL_DELTA, Math.min(MAX_SCROLL_DELTA, e.deltaY));
-  scrollAccumulator += cappedDelta;
+
+  // Determine direction (1 = down/forward, -1 = up/back)
+  const direction = cappedDelta === 0 ? 0 : (cappedDelta > 0 ? 1 : -1);
+
+  // If the user changes direction mid-gesture, don't accumulate the old value —
+  // start accumulating in the new direction but from a small base. This prevents
+  // accidental rapid reversals when using sensitive trackpads.
+  if (lastScrollDirection !== 0 && direction !== 0 && direction !== lastScrollDirection) {
+    scrollAccumulator = cappedDelta * 0.25; // small contribution in new direction
+  } else {
+    // Scale contribution down to make each wheel event feel lighter/smoother
+    scrollAccumulator += cappedDelta * 0.45;
+  }
+
+  // Remember last direction for next event
+  if (direction !== 0) lastScrollDirection = direction;
 
   if (scrollAccumulator >= SCROLL_THRESHOLD) {
     nextStep();
     scrollAccumulator = 0;
+    lastScrollDirection = 0;
   } else if (scrollAccumulator <= -SCROLL_THRESHOLD) {
     prevStep();
     scrollAccumulator = 0;
+    lastScrollDirection = 0;
   }
 }
 
@@ -1111,8 +1134,8 @@ function animateViewerToPosition(viewerCard, x, y, zoom) {
   const originalAnimationTime = osdViewer.animationTime;
   const originalSpringStiffness = osdViewer.springStiffness;
 
-  osdViewer.animationTime = 4.0;  // Seconds for animation - smooth and cinematic
-  osdViewer.springStiffness = 0.8;  // Lower = smoother, less bouncy
+  osdViewer.animationTime = VIEWER_ANIMATION_TIME;
+  osdViewer.springStiffness = VIEWER_SPRING_STIFFNESS;
 
   console.log(`Set animation time to ${osdViewer.animationTime}s, spring stiffness to ${osdViewer.springStiffness}`);
 
@@ -1124,7 +1147,7 @@ function animateViewerToPosition(viewerCard, x, y, zoom) {
   setTimeout(() => {
     osdViewer.animationTime = originalAnimationTime;
     osdViewer.springStiffness = originalSpringStiffness;
-  }, 4100);
+  }, Math.ceil((VIEWER_ANIMATION_TIME + 0.1) * 1000));
 }
 
 /**
@@ -1286,7 +1309,7 @@ function openPanel(panelType, contentId) {
     // Open panel with scroll enabled (allows panel body to scroll)
     const bsOffcanvas = new bootstrap.Offcanvas(panel, {
       scroll: true,
-      backdrop: false
+      backdrop: true
     });
     bsOffcanvas.show();
 

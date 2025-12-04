@@ -177,7 +177,11 @@ h1, h2, h3, h4, h5, h6 {
   left: 0;
   width: 100%;
   height: 100%;
-  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+  /* Smooth, slightly slower cinematic motion */
+  transition: transform 1.2s cubic-bezier(.22,.9,.3,1), opacity 1s ease-in-out;
+  /* Hint to browser to promote to its own layer for smoother animations */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .card-below {
@@ -198,8 +202,8 @@ h1, h2, h3, h4, h5, h6 {
    ============================================================================ */
 @media (max-width: 767px) {
   .viewer-card {
-    /* Override desktop slide animation - fade only on mobile */
-    transition: opacity 300ms ease-out !important;
+    /* Override desktop slide animation - fade only on mobile (slightly slower) */
+    transition: opacity 900ms ease-out !important;
     /* Always at 0 position, no slide */
     transform: translateY(0) !important;
   }
@@ -264,9 +268,9 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(100%);
   opacity: 0;
   transition:
-    border-color 0.3s ease,
-    opacity 0.4s ease-out,
-    transform 0.4s ease-out;
+    border-color 0.35s ease,
+    opacity 1.2s cubic-bezier(.22,.9,.3,1),
+      transform 1.2s cubic-bezier(.22,.9,.3,1);
 
   /* Flex layout for content and button */
   display: flex;
@@ -836,7 +840,7 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none;
   font-size: 0.95em;
   display: inline-block;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.32s ease;
 }
 
 .glossary-inline-link:hover {
@@ -1124,7 +1128,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 1.875rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.28s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     display: flex;
     align-items: center;
@@ -1218,7 +1222,7 @@ h1, h2, h3, h4, h5, h6 {
     right: 0 !important;
     left: auto !important;
     box-shadow: -4px 4px 20px rgba(0, 0, 0, 0.3);
-    transition: transform 300ms ease-out;
+    transition: transform 900ms cubic-bezier(.22,.9,.3,1);
     border-radius: 0 !important; // No rounded corners
 
     // Slide in from right
@@ -1993,7 +1997,7 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 5;
   pointer-events: none;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-  transition: left 0.05s ease;
+  transition: left 0.12s cubic-bezier(.22,.9,.3,1);
 }
 
 .comparison-handle {
@@ -2520,7 +2524,7 @@ body.embed-mode {
     border: 2px solid rgba(0, 0, 0, 0.1) !important;
     color: #333 !important;
     cursor: pointer !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.28s ease !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
     display: flex !important;
     align-items: center !important;
@@ -2733,7 +2737,7 @@ body.embed-mode {
     padding: 2px;
     color: #adb5bd;
     line-height: 1;
-    transition: color 0.2s;
+    transition: color 0.28s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2985,7 +2989,7 @@ body:not(.embed-mode) .telar-embed-banner {
       border-bottom: 2px solid transparent;
       background: none;
       padding: 0.75rem 1rem;
-      transition: all 0.2s;
+      transition: all 0.28s;
 
       &:hover {
         color: var(--color-link);
